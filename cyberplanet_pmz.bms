@@ -1,0 +1,51 @@
+endian little
+Get TOTAL_SIZE asize
+SavePos OFFSET
+
+Get DUMMY_HEADER1 LONGLONG # PZVERSIO
+Get DUMMY_HEADER2 LONG # N2.0
+Get FIno LONG # number of files
+Get FOno LONG # number of folders
+
+set FInex LONG 0x00000000
+set FOnex LONG 0x00000000
+
+For
+	#Sanity Check 1
+	If OFFSET >= TOTAL_SIZE
+		CleanExit
+	EndIf
+	
+	#Sanity Check 2
+	If FInex == FIno
+		If FOnex == FOno
+			CleanExit
+		EndIf
+	EndIf
+
+	Get Identifier SHORT
+	if Identifier == 0x4F46 # FOLDER
+		get FolderLength LONG
+		getDString FolderName FolderLength
+		get FolderPathLength LONG
+		getDString FolderPathName FolderPathLength
+		string FolderPathName += FolderName
+		savepos OFFSET
+		math FOnex += 1
+	elif Identifier == 0x4946 # FILE
+		get FileLength LONG
+		getDString FileName FileLength
+		get FilePathLength LONG
+		getDstring FilePathName FilePathLength
+		string FilePathName += FileName
+		get FileDecSize LONG
+		get FileComSize LONG
+		savepos OFFSET
+		Clog FilePathName OFFSET FileComSize FileDecSize
+		math OFFSET += FileComSize
+		goto OFFSET
+		math FInex += 1
+	else
+		CleanExit
+	EndIf
+Next

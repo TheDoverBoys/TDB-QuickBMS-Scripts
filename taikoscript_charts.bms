@@ -1,0 +1,27 @@
+endian little
+goto 0x1480000
+
+SavePos OFFSET
+get FileNo LONG
+
+For i = 0 < FileNo
+	get FileOffset LONG
+	get FileLength LONG
+	
+	math FileOffset += 0x1480000
+
+	set Pref string "chart_00"
+	if i >= 10 && i < 100
+		string Pref == "chart_0"
+	elif i >= 100
+		string Pref == "chart_"
+	endif
+
+	set NAME string i
+	set FExt string ".chart"
+	string NAME p= "%s%s%s" Pref NAME FExt
+	
+	SavePos OFFSET
+
+	log NAME FileOffset FileLength
+Next i

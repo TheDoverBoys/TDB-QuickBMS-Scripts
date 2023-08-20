@@ -1,0 +1,27 @@
+endian little
+goto 0x2DC000
+
+SavePos OFFSET
+get FileNo LONG
+
+For i = 0 < FileNo
+	get FileOffset LONG
+	get FileLength LONG
+	
+	math FileOffset += 0x2DC000
+
+	set Pref string "00"
+	if i >= 10 && i < 100
+		string Pref == "0"
+	elif i >= 100
+		string Pref == ""
+	endif
+
+	set NAME string i
+	set FExt string ".tim"
+	string NAME p= "%s%s_%x%s" Pref NAME FileOffset FExt
+	
+	SavePos OFFSET
+
+	log NAME FileOffset FileLength
+Next i
