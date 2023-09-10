@@ -1,0 +1,41 @@
+endian little
+
+Get TotalNoFiles LONG
+Get UnkNoFiles LONG
+Get DUMMY1 LONG
+Get DUMMY2 LONG
+SavePos OFFSET
+
+For i = 0 < TotalNoFiles
+	#Sanity Check
+	If NoFiles == TotalNoFiles
+		CleanExit
+	EndIf
+
+	Set FileOffset LONG 0
+	XMath FileOffset "16 + (TotalNoFiles * 16)"
+
+	get FileStart LONG
+	get FileSize LONG
+	get DUMMY3 LONG
+	get TYPE LONG
+	SavePos OFFSET
+
+	math FileOffset + FileStart
+	goto FileOffset
+	set Pref string "000"
+	if i >= 10 && i < 100
+		string Pref == "00"
+	elif i >= 100 && i < 1000
+		string Pref == "0"
+	elif i >= 1000
+		string Pref == ""
+	endif
+
+	set NAME string  i
+	set FExt string ".pvr"
+	string NAME p= "%s%s_%x_%x%s" Pref NAME TYPE FileOffset FExt
+	log NAME FileOffset FileSize
+	SavePos FileOffset
+	goto OFFSET
+Next i
