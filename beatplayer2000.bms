@@ -1,0 +1,13 @@
+endian big
+
+get FileNo LONG
+SavePos OFFSET
+
+For i = 0 < FileNo
+	get FileLength LONG
+	GetDString FileName 0x20
+	get FileOffset LONG
+	SavePos OFFSET
+
+	log FileName FileOffset FileLength
+Next i
