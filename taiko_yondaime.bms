@@ -1,0 +1,41 @@
+endian little
+
+get TotalSize ASIZE
+set Increment SHORT 0x800
+math TotalSize / Increment
+set Counter long 0
+
+For i = 0 < TotalSize
+	savepos OFFSET
+	get Identifier SHORT
+	If Identifier == 0xDA87
+		if Counter == 0
+			set FirstOffset long OFFSET
+		Else
+			set SecondOffset long OFFSET
+			set FileSize SecondOffset
+			math FileSize - FirstOffset
+			set NAME string OFFSET
+			set FExt string ".dat"
+			string NAME p= "%s%s" NAME FExt
+			log NAME FirstOffset FileSize
+			set FirstOffset long SecondOffset
+		EndIf
+		math Counter + 1
+	ElIf Identifier == 0x80FF
+		get Identifier2 SHORT
+		if Identifier2 == 0x0000
+			set SecondOffset long OFFSET
+			set FileSize SecondOffset
+			math FileSize - FirstOffset
+			set NAME string OFFSET
+			set FExt string ".stream"
+			string NAME p= "%s%s" NAME FExt
+			log NAME FirstOffset FileSize
+			set FirstOffset long SecondOffset
+		EndIf
+		math Counter + 1
+	EndIf
+	math OFFSET + 0x800
+	goto OFFSET
+Next i
