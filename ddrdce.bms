@@ -1,0 +1,26 @@
+endian little
+
+get FileNo LONG
+
+For i = 0 < FileNo
+	savepos OFFSET
+	get FileOffset LONG
+	get FileLength LONG
+	get UNKNOWN LONG
+	savepos OFFSET
+	print "%FileOffset% %FileLength% %OFFSET%"
+	set NAME string FileOffset
+	goto FileOffset
+	get FileHeader LONG
+	
+	if FileHeader == 0x694B4942
+		set FExt string ".bik"
+	else
+		set FExt string ".dat"
+	endif
+
+	string NAME p= "%x%s" FileOffset FExt
+	log NAME FileOffset FileLength
+	
+	goto OFFSET
+Next i
