@@ -1,0 +1,34 @@
+endian little
+Get TOTAL_SIZE asize
+
+Get DUMMY_HEADER1 LONG # FFFF
+Get FIno LONG # number of files
+SavePos OFFSET
+
+set FInex LONG 0x00000000
+
+For
+	#Sanity Check 1
+	If OFFSET >= TOTAL_SIZE
+		CleanExit
+	EndIf
+	
+	#Sanity Check 2
+	If FInex == FIno
+		CleanExit
+	EndIf
+	
+	print "%OFFSET%"
+	get FileLength LONG
+	print "%FileLength%"
+	getDString FileName FileLength
+	get FileSize LONG
+	get FileOffset LONG
+	print "%FileName%, %FileSize%, %FileOffset%"
+	savepos OFFSET
+	log FileName FileOffset FileSize
+	math FInex += 1
+	math OFFSET -= 8
+	goto OFFSET
+	EndIf
+Next
