@@ -1,0 +1,105 @@
+endian little
+Get TOTAL_SIZE asize
+
+Get DUMMY_HEADER1 LONG
+Get FIno LONG # number of files
+SavePos OFFSET
+set SlotWidth LONG 20
+set NameStart FIno
+math NameStart * SlotWidth
+math NameStart += 8
+goto NameStart
+Get NamesLength LONG
+Get DUMMY2 BYTE
+SavePos NameStart
+goto 8
+
+PutArray 0 FIno 0
+PutArray 1 FIno 0
+PutArray 2 FIno 0
+
+set FInex LONG 0x00000000
+set FolderName STRING ""
+
+For i = 0 < FIno
+	#Sanity Check
+	If FInex == FIno
+		CleanExit
+	EndIf
+	#print "%OFFSET%"
+	get FileOffset LONG
+	#print "File Number: %i%"
+	#print "File Offset: %FileOffset%"
+	set MemoryOffset i
+	math MemoryOffset *= 4
+	get UNK1 LONG
+	get UNK2 LONG
+	get FileLength LONG
+	get UNK3 LONG
+	math UNK1 s 4
+	print "%UNK1|4h%"
+	SearchArray SEARCHRESULT1 0 UNK1
+	If SEARCHRESULT1 == -1
+		PutArray 0 i UNK1
+		goto NameStart
+		print "Name Start: %NameStart%"
+		PutArray 1 i NameStart
+		get TempFileName STRING
+		savepos NameStart
+		set NameFinder TempFileName
+		CallFunction FolderNameDeterminator 1
+		SearchArray SEARCHRESULT2 2 NameFinder
+	Else
+		print "ordem inicial: %SEARCHRESULT1%"
+		GetArray TempFoundName 2 SEARCHRESULT1
+		goto NameStart
+		set FoundName FolderName
+		string FoundName += TempFoundName
+		log FoundName FileOffset FileLength
+	EndIf
+	goto NameStart
+	math OFFSET += 20
+	goto OFFSET
+	math FInex += 1
+Next i
+
+StartFunction FolderNameDeterminator
+	If NameFinder & "."
+		set FileName TempFileName
+		PutArray 2 i FileName
+		set TempFolderName FolderName
+		string TempFolderName += FileName
+		set FileName TempFolderName
+		print "File Name: %FileName%"
+		log FileName FileOffset FileLength
+		set FILEFLAG 0
+	Else
+		if FILEFLAG == 1
+			if NameFinder & FolderName
+				string TempFileName += "/"
+				set FolderName TempFileName
+			else
+				set TempFolderName2 FolderName
+				string TempFolderName2 += TempFileName
+				string TempFolderName2 += "/"
+				set FolderName TempFolderName2
+			endif
+		else
+			string TempFileName += "/"
+			set FolderName TempFileName
+		endif
+		If UNK2 == 0xFFFFFFFF
+			savepos NameStart
+			print "Name Start: %NameStart%"
+			PutArray 2 i FolderName
+			log FolderName FileOffset FileLength
+			set FILEFLAG 0
+		Else
+			get TempFileName STRING
+			savepos NameStart
+			set NameFinder TempFileName
+			set FILEFLAG 1
+			CallFunction FolderNameDeterminator 1
+		EndIf
+	EndIf
+EndFunction
