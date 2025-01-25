@@ -1,0 +1,50 @@
+endian big
+
+Get OffsetStart LONG
+Get PackLength LONG
+Get NoFiles LONG
+
+PutArray 0 NoFiles 0
+
+For i = 0 < NoFiles
+	get NameLength LONG
+	getDString NameString NameLength
+	PutArray 0 i NameString
+Next i
+
+PutArray 1 NoFiles 0
+
+For i = 0 < NoFiles
+	get FileSize LONG
+	PutArray 1 i FileSize
+Next i
+
+PutArray 2 NoFiles 0
+
+For i = 0 < NoFiles
+	get DecompSize LONG
+	PutArray 2 i DecompSize
+Next i
+
+goto OffsetStart
+SavePos OFFSET
+math OFFSET += 4
+goto OFFSET
+
+For i = 0 < NoFiles
+	get LENGTHPARAM LONG
+	get IsCompress SHORT
+	GetArray NAMEPARAM 0 i
+	GetArray OFFSETPARAM 1 i
+	GetArray DECOMPPARAM 2 i
+	Math OFFSETPARAM += OffsetStart
+	Math OFFSETPARAM += 8
+	if IsCompress == 0x789C
+		clog NAMEPARAM OFFSETPARAM LENGTHPARAM DECOMPPARAM
+	else
+		log NAMEPARAM OFFSETPARAM LENGTHPARAM
+	endif
+	math OFFSET += LENGTHPARAM
+	math OFFSET += 4
+	goto OFFSET
+Next i
