@@ -1,0 +1,32 @@
+endian little
+Get TOTAL_SIZE asize
+
+Get FIno LONG # number of files
+SavePos OFFSET
+
+set FInex LONG 0x00000000
+
+For i = 0 < FIno
+	#Sanity Check 1
+	If OFFSET >= TOTAL_SIZE
+		CleanExit
+	EndIf
+	
+	#Sanity Check 2
+	If FInex == FIno
+		CleanExit
+	EndIf
+	
+	print "%OFFSET%"
+	get FileLength LONG
+	print "%FileLength%"
+	getDString FileName FileLength
+	get FileSize LONG
+	print "%FileName%, %FileSize%"
+	savepos OFFSET
+	log FileName OFFSET FileSize
+	math FInex += 1
+	math OFFSET += FileSize
+	print "%OFFSET%"
+	goto OFFSET
+Next i
