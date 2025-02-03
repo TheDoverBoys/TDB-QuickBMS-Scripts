@@ -1,0 +1,52 @@
+endian big
+
+get Header SHORT
+get ArchiveSize LONG
+get NoFiles SHORT
+get UNKNOWN BYTE
+
+PutArray 0 NoFiles 0
+
+for i = 0 < NoFiles
+	get FileSize LONG
+	putarray 0 i FileSize
+next i
+
+savepos OFFSET
+
+for i = 0 < NoFiles
+	get FileHeader LONG
+	getarray CurOffset 0 i
+	set Nexti i
+	math Nexti += 1
+	
+	if Nexti == NoFiles
+		set NextOffset ArchiveSize
+	else
+		getarray NextOffset 0 Nexti
+	endif
+
+	if FileHeader == 0x49414E04
+		set FileExtension string ".anx"
+	elif FileHeader == 0x89504E47
+		set FileExtension string ".png"
+	elif FileHeader == 0x4D4D4D44
+		set FileExtension string ".mmf"
+	else
+		set FileExtension string ".dat"
+	endif
+
+	if i < 10
+		set addendum string "00"
+	elif i >= 10 && i < 100
+		set addendum string "0"
+	else
+		set addendum string ""
+	endif
+
+	string FileName p= "%x%s" OFFSET FileExtension
+	log FileName OFFSET CurOffset
+	math OFFSET += CurOffset
+	goto OFFSET
+	savepos OFFSET
+next i
