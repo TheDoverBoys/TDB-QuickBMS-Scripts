@@ -1,0 +1,25 @@
+endian little
+
+get RES LONG
+#SanityCheck
+if RES != 0x00534552
+	CleanExit
+endif
+
+get ONE LONG
+
+get NoFiles LONG
+get ArchLen LONG
+
+set GrabOff LONG 16
+set HeadLen LONG 24
+math HeadLen * NoFiles
+math GrabOff + HeadLen
+
+for i = 0 < NoFiles
+	GetDString FILENAME 0x10
+	get FileLen LONG
+	get FileOff LONG
+	math FileOff + GrabOff
+	log FILENAME FileOff FileLen
+next i
